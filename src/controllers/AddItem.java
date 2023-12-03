@@ -1,5 +1,10 @@
 package controllers;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,9 +15,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 public class AddItem {
-    String form = "BOOK";
+    private String form = "BOOK";
+    private String imageURI = "";
 
     @FXML
     private Button book, publication, movie;
@@ -27,7 +34,7 @@ public class AddItem {
     private TextField itemTitle, itemCategory,
             bookAuthors, bookPublishYear, bookPublisher,
             pubAuthors, pubPublishYear, pubPublisher,
-            movieDirectors, movieReleaseYear;
+            movieDirectors, movieReleaseYear, itemImage;
 
     @FXML
     void clickAddButton(ActionEvent event) {
@@ -81,6 +88,32 @@ public class AddItem {
         }
     }
 
+    @FXML
+    boolean chooseImage(ActionEvent event) {
+        boolean isSuccessful = false;
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.png", "*.jpeg"));
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        if (selectedFile != null) {
+            itemImage.setText(selectedFile.getName());
+            try {
+                File destinationFolder = new File("src/images");
+                if (!destinationFolder.exists()) {
+                    destinationFolder.mkdirs();
+                }
+                Path destinationPath = new File(destinationFolder, selectedFile.getName()).toPath();
+                Files.copy(selectedFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+                imageURI = destinationPath.toUri().toString();
+                isSuccessful = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return isSuccessful;
+    }
+
     private void resetForm() {
         itemTitle.clear();
         itemCategory.clear();
@@ -99,7 +132,7 @@ public class AddItem {
         String year = bookPublishYear.getText();
         int publishYear = year.matches("\\d{4}") ? Integer.parseInt(year) : 2000;
         String publisherName = bookPublisher.getText();
-        Store.library.addItem(title, category, authors, publishYear, publisherName);
+        Store.library.addItem(title, category, authors, publishYear, publisherName, imageURI);
     }
 
     private void addPublication(String title, String category) {
@@ -108,13 +141,13 @@ public class AddItem {
         int publishYear = year.matches("\\d{4}") ? Integer.parseInt(year) : 2000;
         String publisherName = pubPublisher.getText();
         boolean isJournalPaper = isJournal.getSelectedToggle().toString().contains("YES");
-        Store.library.addItem(title, category, authors, publishYear, isJournalPaper, publisherName);
+        Store.library.addItem(title, category, authors, publishYear, isJournalPaper, publisherName, imageURI);
     }
 
     private void addMovie(String title, String category) {
         ArrayList<String> directors = new ArrayList<>(Arrays.asList(movieDirectors.getText().split(", ")));
         String year = movieReleaseYear.getText();
         int releaseYear = year.matches("\\d{4}") ? Integer.parseInt(year) : 2000;
-        Store.library.addItem(title, category, directors, releaseYear);
+        Store.library.addItem(title, category, directors, releaseYear, imageURI);
     }
 }

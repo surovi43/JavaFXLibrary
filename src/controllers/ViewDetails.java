@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import library.CheckOutRecord;
 import library.CheckedOutException;
@@ -78,6 +79,7 @@ public class ViewDetails implements Initializable {
          Item item = Store.library.findItem(itemId);
 
          // display item
+         imageView.setImage(new Image(item.getImageURI()));
          title.setText(item.getTitle());
          category.setText(item.getCategory());
          author.setText(item.getAuthors().toString());
