@@ -2,12 +2,15 @@ package controllers;
 
 import library.Item;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import application.Store;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -86,7 +89,16 @@ class ViewDetailsButton extends javafx.scene.control.TableCell<Item, Button> {
 
       this.btn.setOnAction(event -> {
          Item currentItem = getTableView().getItems().get(getIndex());
-         System.out.println(currentItem.getTitle());
+
+         FXMLLoader loader = new FXMLLoader(getClass().getResource("../resources/ViewDetails.fxml"));
+         try {
+            Parent page = loader.load();
+            ViewDetails controller = loader.getController();
+            controller.display(currentItem.getItemId());
+            Store.nevigateTo(page);
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
       });
    }
 
